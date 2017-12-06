@@ -25,6 +25,7 @@
 				month_name: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 				paging: ['<i class="prev"></i>', '<i class="next"></i>'],
 				unavailable: [], // static data - to merge with dynamic data
+				holidays: [],
 				adapter: null, // host to get json data of unavailable date
 				month: null, // month of calendar = month in js + 1, month in js = 0-11
 				year: null, // year of calendar
@@ -45,6 +46,7 @@
 
 		// for plugin
 		this.unavailable = []; // for check for unavailable dates
+		this.holidays = [];
 
 		this.init.call(this);
 		return this;
@@ -83,6 +85,7 @@
 				});
 			}else{
 				this.unavailable = this.options.unavailable;
+				this.holidays = this.options.holidays;
 				this.draw(months);
 			}
 		},
@@ -143,23 +146,25 @@
 		 */
 		getCalendar: function(month, year){
 			var _this = this, date = new Date(), currentDate = new Date();
-			console.log("current date: " + currentDate);
+			//console.log("current date: " + currentDate);
 			var today = currentDate.getDate();
 			var currentMonth = currentDate.getMonth() + 1;
-			console.log("current day: " + today);
-			console.log("current month: " + currentMonth);
+			var currentYear = currentDate.getFullYear();
+
+			//console.log("current day: " + today);
+			//console.log("current month: " + currentMonth);
 			date.setFullYear(year);
             date.setDate(1);
 			date.setMonth(month);
 
             //console.log(date);
 			var day_first = date.getDay();
-			console.log("day: " + day_first);
+			//console.log("day: " + day_first);
 
 			// total date
 			//date.setMonth(date.getMonth() + 1);
 			//date.setDate(0);
-            console.log(date);
+            //console.log(date);
 			var total_date = date.getDate();
 
 			// begin date
@@ -203,7 +208,8 @@
 										d.setFullYear(year);
                     					d.setDate(1);
 										d.setMonth(month);
-										console.log("month: " + month);
+										//console.log("month: " + month);
+										//console.log("year: " + d.getFullYear());
 										//console.log(month, year);
 										//d.setDate(1);
 										d.setDate(-date_start + (j + 1)+(i*7));
@@ -215,15 +221,20 @@
 											}else{
 												cls.push('unavailable');
 											}
+
+											if (_this.isPublicHoliday(d.getDate(), d.getMonth() + 1, d.getFullYear())) {
+												cls.push('holiday');
+											}
+
 											if (d.getMonth() === date.getMonth()){
-                        						console.log(d.getMonth());
-												console.log(date.getMonth());
+                        						//console.log(d.getMonth());
+												//console.log(date.getMonth());
 												cls.push('cur-month');
 											}else{
 												cls.push('near-month');
 											}
 
-											if (d.getMonth() + 1 == currentMonth && d.getDate() == today) {
+											if (d.getFullYear() == currentYear && d.getMonth() + 1 == currentMonth && d.getDate() == today) {
 												cls.push('today')
 											}
 											return cls.join(' ');
@@ -269,6 +280,31 @@
 			}
 			return true;
 		},
+
+        /**
+		 * Check if the date is a public holiday
+		 * Eg: ['year-month-date', '*-month-date']
+         * @param date eg. 25
+         * @param month eg. 11. month in javascript = 0-11, month in MySql = 1-12, so month input have to +1 before run this function
+         * @param year eg. 2017
+         * @returns {boolean}
+         */
+		isPublicHoliday: function (date, month, year) {
+			console.log("in");
+			console.log("filled: " + this.holidays);
+			for (var count in this.holidays) {
+				var holiday_date = this.holidays[count].split('-');
+				console.log("holiday date: " + holiday_date);
+				if (holiday_date.length !== 3) {
+					return true;
+				} else if (
+					(holiday_date[0] - year === 0) && (holiday_date[1] - month === 0) && (holiday_date[2] - date === 0)
+				) {
+					return true;
+				}
+			}
+			return false;
+        }
 	};
 
 	$.fn[plugin_name] = function (options){

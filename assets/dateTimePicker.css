@@ -88,6 +88,11 @@ background:#FEC606;
 color:#fff;
 }
 
+.datetimepicker table td.holiday {
+    background: #97CE68;
+    color:#fff;
+}
+
 .datetimepicker table thead {
 font-weight:700;
 }
@@ -106,4 +111,9 @@ cursor:pointer;
 .datetimepicker table tbody td:hover.unavailable {
 background:#C55762;
 cursor:not-allowed;
+}
+
+.datetimepicker table tbody td:hover.holiday {
+    background:#97CE68;
+    cursor:not-allowed;
 }
